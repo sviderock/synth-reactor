@@ -1,61 +1,88 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-
+import {addBar, switchNoteInBar} from "../../actions/stats";
+import {NOTES_AMOUNT} from "../common/helpers";
 
 class Bar extends Component {
 
   state = {
-    samples: []
+    index: null
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { stats } = nextProps;
-    if(stats.samples && stats.samples.length !== prevState.samples.length) {
-      const { samples } = stats;
-      let newSamples = [];
-      Object.values(samples).map(sample => {
-        newSamples.push({id: sample.id, notes: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]});
-      });
-      return {
-        samples: newSamples
+    const { stats: { bars, samples }, dispatch, index, notes } = nextProps;
+    if(!bars[index] || bars[index].length !== samples.length) {
+      console.log('Initiating bar: ' + index);
+      let initNotes = notes ? notes : [];
+      if(initNotes.length <= 0) {
+        samples.map((sample) => {
+          initNotes.push({id: sample.id, notes: []});
+        });
       }
+      dispatch(addBar(index, initNotes));
     }
-    return null
+    return {index}
   }
 
-  setActiveNote = (e, note) => {
-    const { samples } = this.state;
-    const { sampleIdx, noteIdx, noteValue } = note;
-    samples[sampleIdx].notes[noteIdx] = noteValue;
-    this.setState({samples}, () => console.log(this.state))
+  // componentWillUnmount() {
+  //   const { dispatch, index } = this.props;
+  //   dispatch(deleteBar(index));
+  //   console.log(this.props.stats.bars)
+  // }
+
+  setActiveNote = (_, noteIndex, sampleIndex) => {
+    const { dispatch, index } = this.props;
+    dispatch(switchNoteInBar(index, noteIndex, sampleIndex));
+  };
+
+  activateBarInfo = barID => {
+    this.props.onClick({barInfo: barID});
+  };
+
+
+  renderNotes = (sampleNotes, sampleIndex) => {
+    let domNotes = [];
+    for(let i = 0; i < NOTES_AMOUNT; i++) {
+      const note = sampleNotes.includes(i) ? 1 : 0;
+      domNotes.push(
+        <div key={i}
+             className={`sample-notes-note ${note === 1 ? "active" : ""}`}
+             onClick={_ => this.setActiveNote(_, i, sampleIndex)}>
+          {sampleIndex === 0 ? <span className="sample-notes-note-number" onClick={this.setPosition}>{i + 1}</span> : null}
+        </div>
+      );
+    }
+    return domNotes
+  };
+
+  renderSamples = () => {
+    const { stats: { bars, samples }, index } = this.props;
+    return (
+      <div>
+        {bars[index].map((sample, idx) => {
+            return (
+              <div key={idx} className="sample">
+                <span className="sample-name">{index === 0 ? samples[idx].name : null}</span>
+                <div className="sample-notes">
+                  {this.renderNotes(sample.notes, idx)}
+                </div>
+              </div>
+            )
+          })
+        }
+      </div>
+    );
   };
 
   render() {
-    const { samples } = this.state;
+    const { index } = this.props;
     return (
-      <div className="bar">
-        {samples.map((sample, idx) => {
-          return (
-            <div key={idx} className="sample-notes">
-              {sample.notes.map((note, noteIndex) => {
-                const noteToSet = {
-                  sampleIdx: idx,
-                  noteIdx: noteIndex,
-                  noteValue: note === 0 ? 1 : 0
-                };
-                return (
-                  <div key={noteIndex}
-                       className={`sample-notes-note ${note === 1 ? "active" : ""}`}
-                       onClick={e => this.setActiveNote(e, noteToSet)}
-                  >
-
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
+      <div className="bar" id={`bar-${index + 1}`}>
+        <div className="bar-info">
+          <span className="bar-info-name" onClick={e => this.activateBarInfo(index)}>Bar {index + 1}</span>
+        </div>
+        {this.renderSamples()}
       </div>
     );
   }

@@ -12,11 +12,22 @@ body {
   text-align: center;
 }
 
+.trackline {
+  margin-top: 5rem;
+  width: 100%;
+  position: relative;
+}
+
 .bar {
+  display: inline-block;
+  position: relative;
   .sample {
+    position: relative;
+    line-height: 1;
     &-notes {
       width: 20rem;
-      display: inline-block;
+      display: block;
+      margin: auto;
       &-note {
         display: inline-block;
         background-color: white;
@@ -24,10 +35,48 @@ body {
         height: 1rem;
         border: 1px solid black;
         box-sizing: border-box;
+        position: relative;
+        line-height: 1;
         &.active {
           background-color: black;
         }
+        &-number {
+          position: absolute;
+          font-size: .8rem;
+          width: 100%;
+          height: 100%;
+          text-align: center;
+          left: 0;
+          top: -4rem;
+        }
       }
     }
+    &-name {
+      text-align: right;
+      position: absolute;
+      left: -25%;
+      top: 0;
+      width: 20%;
+      z-index: 1;
+    }
   }
+  &-info {
+    position: absolute;
+    top: -2rem;
+    width: 100%;
+    height: 50%;
+  }
+}
+.bars {
+  width: fit-content;
+  margin: auto;
+  position: relative;
+}
+.pointer {
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  border-left: 2px solid red;
+  top: 0;
+  left: 0;
 }

@@ -3,20 +3,23 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { genId } from "../common/helpers";
 import { addSample } from "../../actions/stats";
+import { Howl } from "howler";
 
 class Sample extends Component {
 
   state = {
     id: null,
     audio: null,
-    group: ""
+    group: "",
+    name: ""
   };
 
   componentWillMount() {
-    const { src } = this.props;
+    const { src, name } = this.props;
     const id = genId("sample");
-    const audio = new Audio(src);
-    this.setState({id, audio}, () => {
+    const audio = new Howl({src
+        : [src]});
+    this.setState({id, audio, name}, () => {
       const { dispatch } = this.props;
       dispatch(addSample(this.state))
     })
