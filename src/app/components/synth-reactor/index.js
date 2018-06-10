@@ -5,11 +5,54 @@ import PropTypes from 'prop-types';
 import Sample from "../sample";
 import Bar from "../bar";
 import Pointer from "../pointer";
-import {setTick, setBpm, setPlay, deleteBars} from "../../actions/stats";
+import ModalWrapped from "../modal";
+import SamplesModalContent from "../modal/content/sample-modal";
+import { setTick, setBpm, setPlay } from "../../actions/stats";
 import Button from "@material-ui/core/Button";
-import Menu from "@material-ui/icons/Menu"
-import Delete from "@material-ui/icons/Delete"
+import Menu from "@material-ui/icons/Menu";
+import Delete from "@material-ui/icons/Delete";
+import MusicNote from "@material-ui/icons/MusicNote";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import Drawer from "@material-ui/core/Drawer";
+import { withStyles } from '@material-ui/core/styles';
+import Divider from "@material-ui/core/Divider";
+import classNames from "classnames";
 
+
+const drawerWidth = window.innerWidth * 0.2;
+
+const styles = theme => ({
+  root: {
+    flexGrow: 1,
+  },
+  appFrame: {
+    height: '100%',
+    zIndex: 1,
+    overflow: 'hidden',
+    position: 'relative',
+    display: 'flex',
+    width: '100%',
+  },
+  appBar: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: drawerWidth
+  },
+  drawerPaper: {
+    position: 'relative',
+    width: drawerWidth,
+  },
+  toolbar: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing.unit * 3,
+  },
+  trackline: {
+    maxWidth: 'max-content'
+  }
+});
 
 
 class SynthReactor extends Component {
@@ -29,7 +72,7 @@ class SynthReactor extends Component {
     sampleNodes: [
       <Sample key={0} name="Kick" src="/static/samples/kicks/kick_1.wav" />,
       <Sample key={1} name="Snare" src="/static/samples/snares/snare_4.wav" />,
-      <Sample key={2} name="Hi-hat"src="/static/samples/hihats/hihat_008a.wav" />
+      <Sample key={2} name="Hi-hat" src="/static/samples/hihats/hihat_008a.wav" />
     ],
     barNodes: [],
     barInfo: null,
@@ -37,7 +80,8 @@ class SynthReactor extends Component {
       bar: 0,
       beat: 0,
       note: 0
-    }
+    },
+    modalOpened: false
   };
 
   componentDidMount() {
@@ -57,6 +101,7 @@ class SynthReactor extends Component {
       this.play();
     })
   };
+
 
   play = () => {
     const { stats: { bpm, bars }, dispatch } = this.props;
@@ -137,6 +182,11 @@ class SynthReactor extends Component {
     this.setState({barNodes})
   };
 
+  // addSample = () => {
+  //   let { sampleNodes } = this.state;
+  //   sampleNodes.push()
+  // };
+
   deleteBar = barID => {
     let { barNodes } = this.state;
     barNodes.splice(barID, 1);
@@ -159,6 +209,18 @@ class SynthReactor extends Component {
     this.setState(object)
   };
 
+
+  toggleModal = () => {
+    const { modalOpened } = this.state;
+    this.setState({modalOpened: !modalOpened})
+  };
+
+  addSample = sample => {
+    let { sampleNodes, modalOpened } = this.state;
+    sampleNodes.push(sample);
+    this.setState({sampleNodes, modalOpened: !modalOpened})
+  };
+
   renderBars = () => {
     const { barNodes } = this.state;
     return (
@@ -171,85 +233,91 @@ class SynthReactor extends Component {
   };
 
   render() {
-    let { bpm } = this.props.stats;
-    const { tick, tick: { bar, beat, note }, playing, sampleNodes, barNodes, metronome: { mute }, barInfo } = this.state;
+    let { stats: { bpm }, classes } = this.props;
+    const { tick, tick: { bar, beat, note }, playing, sampleNodes, barNodes, metronome: { mute }, barInfo, modalOpened } = this.state;
     const playingText = playing ? "stop" : "play";
 
     return (
-      <div>
-        <div className="controls">
-          <div className="controls-">
-            <span>Bar: {bar +1}</span>
-            <span>Beat: {beat + 1}</span>
-            <span>Note: {note + 1}</span>
-          </div>
-          <div className="controls-play">
-            <div>
-              <div>
-                Metronome <span>{bpm}</span>
+      <div className={classes.root}>
+        <div className={classes.appFrame}>
+          <AppBar position="absolute"
+                  className={classNames(classes.appBar)}>
+            <Toolbar>
+              <Typography variant="title" color="inherit" noWrap>
+                Synth Reactor
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            variant="permanent"
+            classes={{paper: classes.drawerPaper}}
+            anchor="left">
+            <div className={classes.toolbar}  />
+            <Divider />
+          </Drawer>
+          <div className={classes.content}>
+
+            <div className="controls">
+              <div className="controls-">
+                <span>Bar: {bar +1}</span>
+                <span>Beat: {beat + 1}</span>
+                <span>Note: {note + 1}</span>
               </div>
-              <input type="range" min={40} max={250} value={bpm} onChange={this.setBpm} />
-              <div onClick={this.muteMetronome}>Turn {mute ? "ON" : "OFF"}</div>
-            </div>
-            <span onClick={this.togglePlay}>{playingText}</span>
-          </div>
-          <div className="controls-bars">
-            <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={this.addBar} title="Add bar">
-              <Menu />
-            </Button>
-            {barInfo !== null ?
-              <div className="controls-single-bar">
-                <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={_ => this.deleteBar(barInfo)}>
-                  <Delete />
+              <div className="controls-play">
+                <div>
+                  <div>
+                    Metronome <span>{bpm}</span>
+                  </div>
+                  <input type="range" min={40} max={250} value={bpm} onChange={this.setBpm} />
+                  <div onClick={this.muteMetronome}>Turn {mute ? "ON" : "OFF"}</div>
+                </div>
+                <span onClick={this.togglePlay}>{playingText}</span>
+              </div>
+              <div className="controls-bars">
+                <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={this.addBar} title="Add bar">
+                  <Menu />
                 </Button>
-              </div> : null
-            }
-          </div>
-        </div>
-        <div className="trackline">
-          <div>
-            <div>{sampleNodes}</div>
-          </div>
-          <div className="bars">
-            <div className="bars-container">
-              {this.renderBars()}
+                {barInfo !== null ?
+                  <div className="controls-single-bar">
+                    <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={_ => this.deleteBar(barInfo)}>
+                      <Delete />
+                    </Button>
+                  </div> : null
+                }
+              </div>
+
+              <div className="controls-samples">
+                <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={this.toggleModal} title="Add sample">
+                  <MusicNote />
+                </Button>
+              </div>
             </div>
-            {/*<Pointer position={tick} />*/}
-          </div>
 
+
+            <div className={classNames(classes.trackline, 'trackline')}>
+
+              <div className="samples">
+                <div className="samples-container">
+                  {sampleNodes}
+                </div>
+              </div>
+              <div className="bars">
+                <div className="bars-container">
+                  {this.renderBars()}
+                </div>
+                {/*<Pointer position={tick} />*/}
+              </div>
+
+            </div>
+
+          </div>
         </div>
 
 
-        {/*<div>*/}
-          {/*<AppBar>*/}
-            {/*<Toolbar>*/}
-              {/*<Typography variant="title" color="inherit" noWrap>*/}
-                {/*Responsive drawer*/}
-              {/*</Typography>*/}
-            {/*</Toolbar>*/}
-          {/*</AppBar>*/}
-          {/*<Drawer*/}
-            {/*variant="permanent"*/}
-            {/*anchor='left'*/}
-            {/*open*/}
-            {/*ModalProps={{keepMounted: true,}}*/}
-          {/*>*/}
-            {/*<div className="ist">*/}
-              {/*<List>*/}
-                {/*<Typography variant="title" color="inherit" noWrap>*/}
-                  {/*Responsive drawer*/}
-                {/*</Typography>*/}
-                {/*<Typography variant="title" color="inherit" noWrap>*/}
-                  {/*Responsive drawer*/}
-                {/*</Typography>*/}
-              {/*</List>*/}
-            {/*</div>*/}
-          {/*</Drawer>*/}
-          {/*<main>*/}
-            {/*<div/>*/}
-            {/*<Typography noWrap>{'You think water moves fast? You should see ice.'}</Typography>*/}
-          {/*</main>*/}
-        {/*</div>*/}
+        <ModalWrapped opened={modalOpened} onClose={this.toggleModal}>
+          <SamplesModalContent onSampleAdd={this.addSample}/>
+        </ModalWrapped>
+
       </div>
     )
   }
@@ -260,4 +328,4 @@ SynthReactor.propTypes = {
 
 };
 
-export default connect(state => state)(SynthReactor);
+export default connect(state => state)(withStyles(styles)(SynthReactor));

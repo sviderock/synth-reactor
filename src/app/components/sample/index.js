@@ -17,8 +17,7 @@ class Sample extends Component {
   componentWillMount() {
     const { src, name } = this.props;
     const id = genId("sample");
-    const audio = new Howl({src
-        : [src]});
+    const audio = new Howl({src: [src]});
     this.setState({id, audio, name}, () => {
       const { dispatch } = this.props;
       dispatch(addSample(this.state))
@@ -26,7 +25,11 @@ class Sample extends Component {
   }
 
   render() {
-    return null
+    return (
+      <div className="sample">
+
+      </div>
+    )
   }
 
 }

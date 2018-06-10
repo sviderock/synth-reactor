@@ -98,6 +98,10 @@ if (!isProduction) {
     inline: true,
     progress: true,
     historyApiFallback: true,
+    open: true,
+    proxy: {
+      "/api": "http://localhost:8080"
+    }
   };
 }
 

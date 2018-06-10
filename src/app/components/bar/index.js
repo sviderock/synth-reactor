@@ -11,8 +11,10 @@ class Bar extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
+    console.log('reinit bar');
     const { stats: { bars, samples }, dispatch, index, notes } = nextProps;
-    if(!bars[index] || bars[index].length !== samples.length) {
+
+    if(!bars[index]) {
       console.log('Initiating bar: ' + index);
       let initNotes = notes ? notes : [];
       if(initNotes.length <= 0) {
@@ -22,6 +24,17 @@ class Bar extends Component {
       }
       dispatch(addBar(index, initNotes));
     }
+
+    if(bars[index].length !== samples.length) {
+      const sampleIDS = bars[index].map(sample => sample.id);
+      samples.map(sample => {
+        if(!sampleIDS.includes(sample.id)) {
+          bars[index].push({id: sample.id, notes: []});
+        }
+      });
+      dispatch(addBar(index, bars[index]));
+    }
+
     return {index}
   }
 
@@ -47,9 +60,9 @@ class Bar extends Component {
       const note = sampleNotes.includes(i) ? 1 : 0;
       domNotes.push(
         <div key={i}
-             className={`sample-notes-note ${note === 1 ? "active" : ""}`}
+             className={`bar-sample-notes-note ${note === 1 ? "active" : ""}`}
              onClick={_ => this.setActiveNote(_, i, sampleIndex)}>
-          {sampleIndex === 0 ? <span className="sample-notes-note-number" onClick={this.setPosition}>{i + 1}</span> : null}
+          {sampleIndex === 0 ? <span className="bar-sample-notes-note-number" onClick={this.setPosition}>{i + 1}</span> : null}
         </div>
       );
     }
@@ -62,9 +75,8 @@ class Bar extends Component {
       <div>
         {bars[index].map((sample, idx) => {
             return (
-              <div key={idx} className="sample">
-                <span className="sample-name">{index === 0 ? samples[idx].name : null}</span>
-                <div className="sample-notes">
+              <div key={idx} className="bar-sample">
+                <div className="bar-sample-notes">
                   {this.renderNotes(sample.notes, idx)}
                 </div>
               </div>
@@ -80,7 +92,7 @@ class Bar extends Component {
     return (
       <div className="bar" id={`bar-${index + 1}`}>
         <div className="bar-info">
-          <span className="bar-info-name" onClick={e => this.activateBarInfo(index)}>Bar {index + 1}</span>
+          <span className="bar-info-name" onClick={_ => this.activateBarInfo(index)}>Bar {index + 1}</span>
         </div>
         {this.renderSamples()}
       </div>
