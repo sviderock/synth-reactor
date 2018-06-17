@@ -20,6 +20,7 @@ app.use(express.static('dist'));
 
 app.get('/recorderWorker.js', (request, response) => {
   response.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.header("Access-Control-Allow-Origin", "http://localhost:8080");
   response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk:8080");
   response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk");
   response.header("Access-Control-Allow-Origin", "https://synth-reactor.tk:8080");
@@ -29,6 +30,7 @@ app.get('/recorderWorker.js', (request, response) => {
 
 app.get('/getSamples', (request, response) => {
   response.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.header("Access-Control-Allow-Origin", "http://localhost:8080");
   response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk:8080");
   response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk");
   response.header("Access-Control-Allow-Origin", "https://synth-reactor.tk:8080");
