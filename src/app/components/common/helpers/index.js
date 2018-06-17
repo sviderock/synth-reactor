@@ -12,7 +12,7 @@ export const colors = [
   {bg: '#DD614A', text: '#fff'},
   {bg: '#FADF63', text: '#000'},
   {bg: '#E7EB90', text: '#fff'},
-  {bg: '#EA8C3', text: '#fff'},
+  {bg: '#EA8C3f', text: '#fff'},
   {bg: '#F2D492', text: '#000'}
 ];
 

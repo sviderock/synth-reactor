@@ -86,19 +86,23 @@ body {
     margin-top: .8rem;
   }
   &-number {
-    &-bar.active {
-      color: #fff;
-      &:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
+    &-bar {
+      transition: none !important;
+      &.active {
+        color: #fff;
         background-color: $peach;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        opacity: .7;
-        z-index: -1;
+        &:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          background-color: $peach;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          opacity: .7;
+          z-index: -1;
+        }
       }
     }
   }
@@ -152,12 +156,9 @@ body {
     padding: 0.63rem 0;
     &-item {
       width: 33.333%;
-      span {
+      & > span:first-child {
         display: block;
-        &:first-child {
-
-        }
-        &:last-child {}
+        margin-bottom: .5rem;
       }
     }
   }

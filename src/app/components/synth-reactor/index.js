@@ -108,7 +108,7 @@ const styles = theme => ({
   controllsTick: {
     backgroundColor: palette.peach,
     color: palette.white,
-    padding: '1.1rem 0'
+    padding: '0.3rem 0 .8rem'
   },
   samples: {
 

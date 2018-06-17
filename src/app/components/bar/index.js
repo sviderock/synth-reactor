@@ -96,15 +96,15 @@ class Bar extends Component {
   };
 
   renderSamples = () => {
-    const { stats: { bars, samples }, index, classes } = this.props;
+    const { stats: { bars }, index, classes } = this.props;
     return (
       <div>
         {bars[index].map((sample, idx) => {
-          const colorIDX = samples.length >= colors.length ? (samples.length - colors.length) : samples.length;
+          const colorIDX = idx >= colors.length ? (idx - colors.length) : idx;
           return (
               <div key={idx} className="bar-sample">
                 <div className={classNames("bar-sample-notes", classes.barSampleNotes)}>
-                  {this.renderNotes(sample.notes, idx, colors[idx])}
+                  {this.renderNotes(sample.notes, idx, colors[colorIDX])}
                 </div>
               </div>
             )
