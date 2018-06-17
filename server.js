@@ -20,11 +20,19 @@ app.use(express.static('dist'));
 
 app.get('/recorderWorker.js', (request, response) => {
   response.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk:8080");
+  response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk");
+  response.header("Access-Control-Allow-Origin", "https://synth-reactor.tk:8080");
+  response.header("Access-Control-Allow-Origin", "https://synth-reactor.tk");
   response.send(`${__dirname}/node_modules/recorderjs/recorderWorker.js`);
 });
 
 app.get('/getSamples', (request, response) => {
   response.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk:8080");
+  response.header("Access-Control-Allow-Origin", "http://synth-reactor.tk");
+  response.header("Access-Control-Allow-Origin", "https://synth-reactor.tk:8080");
+  response.header("Access-Control-Allow-Origin", "https://synth-reactor.tk");
   const fileslist = allFilesSync(`${__dirname}/static/samples`);
   response.send({ fileslist });
 });
