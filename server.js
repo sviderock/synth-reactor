@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const app = express();
-
+express.static.mime.types["wasm"] = "application/wasm";
 function allFilesSync(dir, fileList = []) {
   fs.readdirSync(dir).forEach(file => {
     if (file !== '.DS_Store') {
@@ -17,6 +17,11 @@ function allFilesSync(dir, fileList = []) {
 
 app.use(express.static('./'));
 app.use(express.static('dist'));
+
+app.get('/recorderWorker.js', (request, response) => {
+  response.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.send(`${__dirname}/node_modules/recorderjs/recorderWorker.js`);
+});
 
 app.get('/getSamples', (request, response) => {
   response.header("Access-Control-Allow-Origin", "http://localhost:3000");

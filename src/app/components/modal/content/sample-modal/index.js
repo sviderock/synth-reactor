@@ -17,7 +17,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Check from "@material-ui/icons/Check";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Sample from "../../../sample";
-import {addSample} from "../../../../actions/stats";
+import {colors} from "../../../common/helpers";
 
 class SamplesModalContent extends Component {
 
@@ -48,7 +48,9 @@ class SamplesModalContent extends Component {
   selectSound = (dir, sound) => {
     const { samples } = this.props.stats;
     const path = '/static/samples/' + dir + '/' + sound;
-    const sample = <Sample key={samples.length} name={sound} src={path} />;
+    const colorIDX = samples.length >= colors.length ? (samples.length - colors.length) : samples.length;
+    console.log(colorIDX);
+    const sample = <Sample color={colors[colorIDX]} key={samples.length} name={sound} src={path} />;
     this.props.onSampleAdd(sample);
   };
 

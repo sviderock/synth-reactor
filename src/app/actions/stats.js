@@ -12,6 +12,21 @@ export function addSample(sample) {
   };
 }
 
+export function muteSample(id, mute) {
+  return {
+    type: 'MUTE_SAMPLE',
+    id,
+    mute
+  };
+}
+
+export function deleteSample(id) {
+  return {
+    type: 'DELETE_SAMPLE',
+    id
+  };
+}
+
 export function addBar(index, notes) {
   return {
     type: 'ADD_BAR',
@@ -53,5 +68,12 @@ export function setBpm(bpm) {
   return {
     type: 'SET_BPM',
     bpm
+  };
+}
+
+export function reinitStats(stats) {
+  return {
+    type: 'REINIT_STATS',
+    stats
   };
 }

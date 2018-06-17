@@ -67,12 +67,15 @@
     "fs": "0.0.1-security",
     "howler": "^2.0.12",
     "npm": "^6.1.0",
+    "opus-recorder": "^4.1.4",
     "prop-types": "^15.6.1",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
+    "react-ionicons": "^2.1.6",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "4.2.2",
+    "recorderjs": "^1.0.1",
     "redux": "^3.7.2"
   }
 }

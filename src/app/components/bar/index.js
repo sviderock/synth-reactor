@@ -2,20 +2,43 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {addBar, switchNoteInBar} from "../../actions/stats";
-import {NOTES_AMOUNT} from "../common/helpers";
+import {colors, NOTES_AMOUNT, palette} from "../common/helpers";
+import Button from "@material-ui/core/Button";
+import { withStyles } from '@material-ui/core/styles';
+import classNames from "classnames";
+
+
+const styles = theme => ({
+  note: {
+    minHeight: '3rem',
+    minWidth: '2rem',
+    margin: '0 .1rem',
+    backgroundColor: '#A0C1D1'
+  },
+  barInfo: {
+    color: theme.palette.primary.main,
+    top: '-.8rem',
+    height: '110%'
+  },
+  barInfoActive: {
+    backgroundColor: '#ecc9b9'
+  },
+  barSampleNotes: {
+    padding: '1rem 0',
+    display: 'flex'
+  }
+});
 
 class Bar extends Component {
 
   state = {
-    index: null
+
   };
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    console.log('reinit bar');
+  static getDerivedStateFromProps(nextProps) {
     const { stats: { bars, samples }, dispatch, index, notes } = nextProps;
 
     if(!bars[index]) {
-      console.log('Initiating bar: ' + index);
       let initNotes = notes ? notes : [];
       if(initNotes.length <= 0) {
         samples.map((sample) => {
@@ -54,30 +77,34 @@ class Bar extends Component {
   };
 
 
-  renderNotes = (sampleNotes, sampleIndex) => {
+  renderNotes = (sampleNotes, sampleIndex, color) => {
+    const { classes } = this.props;
     let domNotes = [];
     for(let i = 0; i < NOTES_AMOUNT; i++) {
       const note = sampleNotes.includes(i) ? 1 : 0;
       domNotes.push(
-        <div key={i}
-             className={`bar-sample-notes-note ${note === 1 ? "active" : ""}`}
-             onClick={_ => this.setActiveNote(_, i, sampleIndex)}>
-          {sampleIndex === 0 ? <span className="bar-sample-notes-note-number" onClick={this.setPosition}>{i + 1}</span> : null}
-        </div>
+        <Button key={i}
+                variant={note === 1 ? 'contained' : 'outlined'}
+                size="small"
+                component="div"
+                style={{backgroundColor: note === 1 ? color.bg : '#A0C1D155'}}
+                className={classNames("bar-sample-notes-note", classes.note)}
+                onClick={_ => this.setActiveNote(_, i, sampleIndex)} />
       );
     }
     return domNotes
   };
 
   renderSamples = () => {
-    const { stats: { bars, samples }, index } = this.props;
+    const { stats: { bars, samples }, index, classes } = this.props;
     return (
       <div>
         {bars[index].map((sample, idx) => {
-            return (
+          const colorIDX = samples.length >= colors.length ? (samples.length - colors.length) : samples.length;
+          return (
               <div key={idx} className="bar-sample">
-                <div className="bar-sample-notes">
-                  {this.renderNotes(sample.notes, idx)}
+                <div className={classNames("bar-sample-notes", classes.barSampleNotes)}>
+                  {this.renderNotes(sample.notes, idx, colors[idx])}
                 </div>
               </div>
             )
@@ -88,10 +115,10 @@ class Bar extends Component {
   };
 
   render() {
-    const { index } = this.props;
+    const { index, classes, active } = this.props;
     return (
       <div className="bar" id={`bar-${index + 1}`}>
-        <div className="bar-info">
+        <div className={classNames("bar-info", classes.barInfo, active ? classes.barInfoActive : null)}>
           <span className="bar-info-name" onClick={_ => this.activateBarInfo(index)}>Bar {index + 1}</span>
         </div>
         {this.renderSamples()}
@@ -105,4 +132,4 @@ Bar.propTypes = {
 
 };
 
-export default connect(state => state)(Bar)
+export default connect(state => state)(withStyles(styles)(Bar))

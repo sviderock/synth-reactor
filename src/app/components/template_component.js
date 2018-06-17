@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import classNames from "classnames";
+import {palette} from "./common/helpers";
+
 
 class Sample extends Component {
 
@@ -10,7 +13,7 @@ class Sample extends Component {
 
   render() {
     return (
-      <div />
+      <div></div>
     );
   }
 
