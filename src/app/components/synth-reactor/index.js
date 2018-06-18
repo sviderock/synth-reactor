@@ -6,7 +6,7 @@ import Sample from "../sample";
 import Bar from "../bar";
 import ModalWrapped from "../modal";
 import SamplesModalContent from "../modal/content/sample-modal";
-import {setTick, setBpm, setPlay, deleteSample, reinitStats} from "../../actions/stats";
+import {setTick, setBpm, setPlay, deleteSample, reinitStats, deleteBar} from "../../actions/stats";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/icons/Menu";
 import Delete from "@material-ui/icons/Delete";
@@ -82,7 +82,9 @@ const styles = theme => ({
   drawerPaper: {
     position: 'relative',
     width: drawerWidth,
-    backgroundColor: palette.black
+    backgroundColor: palette.black,
+    height: 'max-content',
+    minHeight: '100vh'
   },
   toolbar: theme.mixins.toolbar,
   content: {
@@ -273,9 +275,13 @@ class SynthReactor extends Component {
   playNote = (bar, note) => {
     const { bars, samples } = this.props.stats;
     bars[bar].map((sample, idx) => {
-      sample.notes.includes(note) ? (!samples[idx].mute ? samples[idx].audio.play() : false) : null;
+      sample.notes.includes(note) ? (this.samplePlayable(samples[idx]) ? samples[idx].audio.play() : false) : null;
     });
   };
+
+  samplePlayable = sample => {
+    return !sample.mute && !sample.deleted;
+  }
 
   toggleMetronome = e => {
     const { metronome } = this.state;
@@ -298,21 +304,11 @@ class SynthReactor extends Component {
   };
 
   deleteBar = barID => {
+    const { dispatch } = this.props;
     let { barNodes } = this.state;
-    barNodes.splice(barID, 1);
-    // const newBarNodes = this.reinitBars(barID, barNodes);
+    dispatch(deleteBar(barID));
 
     this.setState({barNodes, barInfo: null})
-  };
-
-  reinitBars = (deletedBarID, barNodes) => {
-    const { stats: { bars } } = this.props;
-    let newBarNodes = [];
-    barNodes.map((bar, idx) => {
-      const newOne = idx >= deletedBarID;
-      newBarNodes.push(<Bar key={idx} index={idx} onClick={this.onClickAction} notes={bars[newOne ? idx + 1 : idx]} />);
-    });
-    return newBarNodes
   };
 
   onClickAction = object => {
@@ -353,16 +349,6 @@ class SynthReactor extends Component {
     this.setState({lastRecSrc: link})
   };
 
-  deleteSample = idx => {
-    let { samples } = this.props.stats;
-    // console.log(samples)
-    // let { sampleNodes } = this.state;
-    // sampleNodes.splice(idx, 1);
-    // samples.splice(idx, 1);
-    // this.initSamples(samples);
-    // this.setState({dialogOpened: false, sampleNodes})
-  };
-
   toggleLoop = () => {
     const { loop } = this.state;
     this.setState({loop: !loop})
@@ -370,10 +356,11 @@ class SynthReactor extends Component {
 
   renderBars = () => {
     const { barNodes, barInfo } = this.state;
+    console.log(this.props.bars);
     return (
       <div className="bars-container">
         {barNodes.map((bar, idx) => {
-          return (<Bar key={idx} index={idx} active={barInfo === idx} onClick={this.onClickAction} />)
+          return (<Bar key={idx} index={idx} deleted={bar.deleted} active={barInfo === idx} onClick={this.onClickAction} />)
         })}
       </div>
     )

@@ -22,6 +22,7 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import VolumeUp from "@material-ui/icons/VolumeUp";
 import VolumeOff from "@material-ui/icons/VolumeOff";
+import { withStyles } from '@material-ui/core/styles';
 
 
 
@@ -33,6 +34,9 @@ const styles = theme => ({
   peachButtonActive: {
     backgroundColor: palette.peachDark,
     color: palette.white
+  },
+  sampleButton: {
+    margin: '0 1rem'
   }
 });
 
@@ -45,6 +49,7 @@ class Sample extends Component {
     name: "",
     open: false,
     mute: false,
+    deleted: false,
     color: {
       bg: palette.peach,
       text: palette.white
@@ -62,33 +67,29 @@ class Sample extends Component {
     })
   }
 
-  // componentWillUnmount() {
-  //   const { dispatch, id } = this.props;
-  //   dispatch(deleteSample(id));
-  // }
-
   toggleOpen = e => {
     const { open } = this.state;
     this.setState({open: !open})
   };
 
-  deleteSample = id => {
-    const { samples } = this.props.stats;
-    const idx = samples.indexOf(samples.find(sample => sample.id === id));
-    this.props.onDelete(idx)
+  deleteSample = e => {
+    const { id } = this.state;
+    const { dispatch } = this.props;
+    this.setState({deleted: true}, () => dispatch(deleteSample(id)));
   };
 
   muteSample = e => {
     const { dispatch } = this.props;
     const { mute, id } = this.state;
     this.setState({mute: !mute}, () => dispatch(muteSample(id, this.state.mute)))
-  }
+  };
 
   render() {
-    const { color } = this.props;
-    const { id, name, open, mute } = this.state;
+    const { color, classes } = this.props;
+    const { id, name, open, mute, deleted } = this.state;
     return (
-      <div>
+      deleted ? null :
+      <div style={{backgroundColor: color.bg + "88"}}>
         <div className="sample" id={id} style={{backgroundColor: color.bg}}>
           <ListItem>
             <Avatar>
@@ -105,16 +106,15 @@ class Sample extends Component {
         </div>
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div">
-            <Button variant="fab" mini color="secondary" onClick={this.muteSample}>
+            <Button className={classNames(classes.sampleButton)} variant="fab" mini color="secondary" onClick={this.muteSample}>
               {mute ? <VolumeOff />: <VolumeUp />}
             </Button>
-            {/*<Button variant="fab" mini color="secondary">*/}
-              {/*<Delete onClick={e => this.deleteSample(id)} />*/}
-            {/*</Button>*/}
+            <Button className={classNames(classes.sampleButton)} variant="fab" mini color="secondary" onClick={this.deleteSample}>
+              <Delete />
+            </Button>
           </List>
         </Collapse>
       </div>
-
     )
   }
 
@@ -126,4 +126,4 @@ Sample.propTypes = {
   color: PropTypes.object
 };
 
-export default connect(state => state)(Sample)
+export default connect(state => state)(withStyles(styles)(Sample))

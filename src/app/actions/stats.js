@@ -35,9 +35,10 @@ export function addBar(index, notes) {
   };
 }
 
-export function deleteBars() {
+export function deleteBar(index) {
   return {
-    type: 'DELETE_BAR'
+    type: 'DELETE_BAR',
+    index
   };
 }
 

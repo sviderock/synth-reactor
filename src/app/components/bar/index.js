@@ -61,12 +61,6 @@ class Bar extends Component {
     return {index}
   }
 
-  // componentWillUnmount() {
-  //   const { dispatch, index } = this.props;
-  //   dispatch(deleteBar(index));
-  //   console.log(this.props.stats.bars)
-  // }
-
   setActiveNote = (_, noteIndex, sampleIndex) => {
     const { dispatch, index } = this.props;
     dispatch(switchNoteInBar(index, noteIndex, sampleIndex));
@@ -75,7 +69,6 @@ class Bar extends Component {
   activateBarInfo = barID => {
     this.props.onClick({barInfo: barID});
   };
-
 
   renderNotes = (sampleNotes, sampleIndex, color) => {
     const { classes } = this.props;
@@ -96,18 +89,20 @@ class Bar extends Component {
   };
 
   renderSamples = () => {
-    const { stats: { bars }, index, classes } = this.props;
+    const { stats: { bars, samples }, index, classes } = this.props;
     return (
       <div>
         {bars[index].map((sample, idx) => {
-          const colorIDX = idx >= colors.length ? (idx - colors.length) : idx;
-          return (
+          if(!samples.find(i => i.id === sample.id).deleted) {
+            const colorIDX = idx >= colors.length ? (idx - colors.length) : idx;
+            return (
               <div key={idx} className="bar-sample">
                 <div className={classNames("bar-sample-notes", classes.barSampleNotes)}>
                   {this.renderNotes(sample.notes, idx, colors[colorIDX])}
                 </div>
               </div>
             )
+          }
           })
         }
       </div>
@@ -115,7 +110,8 @@ class Bar extends Component {
   };
 
   render() {
-    const { index, classes, active } = this.props;
+    const { index, classes, active, deleted } = this.props;
+    console.log(this.props.stats.bars)
     return (
       <div className="bar" id={`bar-${index + 1}`}>
         <div className={classNames("bar-info", classes.barInfo, active ? classes.barInfoActive : null)}>

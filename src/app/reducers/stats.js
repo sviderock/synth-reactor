@@ -19,7 +19,7 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
-  let bars;
+  let bars, sample, index;
   switch (action.type) {
 
     case 'SET_STATS':
@@ -29,22 +29,28 @@ export default function (state = initialState, action) {
       return {...state, samples: [...state.samples, action.sample]};
 
     case 'MUTE_SAMPLE':
-      let sample = state.samples.find(i => i.id === action.id);
-      const index = state.samples.indexOf(sample);
+      sample = state.samples.find(i => i.id === action.id);
+      index = state.samples.indexOf(sample);
       sample.mute = action.mute;
       state.samples[index] = sample;
       return {...state, samples: state.samples};
 
     case 'DELETE_SAMPLE':
-      return {...state, samples: state.samples.filter(sample => sample.id !== action.id)};
+      sample = state.samples.find(i => i.id === action.id);
+      index = state.samples.indexOf(sample);
+      sample.deleted = true;
+      state.samples[index] = sample;
+      return {...state, samples: state.samples};
 
     case 'ADD_BAR':
       bars = state.bars;
       bars[action.index] = action.notes;
       return {...state, bars};
 
-    case 'DELETE_BARS':
-      return {...state, bars: []};
+    case 'DELETE_BAR':
+      bars = state.bars;
+      bars[action.index].deleted = true;
+      return {...state, bars: bars};
 
     case 'SET_PLAY':
       return {...state, playing: action.playing};
