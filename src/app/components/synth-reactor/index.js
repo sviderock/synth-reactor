@@ -6,7 +6,7 @@ import Sample from "../sample";
 import Bar from "../bar";
 import ModalWrapped from "../modal";
 import SamplesModalContent from "../modal/content/sample-modal";
-import {setTick, setBpm, setPlay, deleteSample, reinitStats, deleteBar} from "../../actions/stats";
+import {setTick, setBpm, setPlay, deleteSample, reinitStats, deleteBar, clearDeletedBarID} from "../../actions/stats";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/icons/Menu";
 import Delete from "@material-ui/icons/Delete";
@@ -33,6 +33,9 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Loop from "@material-ui/icons/Loop";
 import Chip from "@material-ui/core/Chip";
+import VolumeUp from "@material-ui/icons/VolumeUp";
+import VolumeOff from "@material-ui/icons/VolumeOff";
+import Avatar from "@material-ui/core/Avatar";
 
 const theme = createMuiTheme({
   palette: {
@@ -146,7 +149,11 @@ class SynthReactor extends Component {
     },
     sampleNodes: [],
     barNodes: [],
-    barInfo: null,
+    barInfo: {
+      index: null,
+      muted: false,
+      loop: false
+    },
     tick: {
       bar: 0,
       beat: 0,
@@ -160,29 +167,25 @@ class SynthReactor extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    // console.log(nextProps.stats.samples);
-    // if(nextProps.stats.samples.length !== prevState.sampleNodes.length) {
-    //
-    // }
+    if(nextProps.stats.bars.length !== prevState.barNodes.length && nextProps.stats.lastDeletedBarID !== null) {
+      const { stats: { lastDeletedBarID }, dispatch } = nextProps;
+      let barNodes = prevState.barNodes;
+      barNodes.splice(lastDeletedBarID, 1);
+      dispatch(clearDeletedBarID());
+      return {...prevState, barNodes}
+    }
     return prevState
   }
 
   componentDidMount() {
     this.init();
-    // const stats = JSON.parse(localStorage.getItem('stats'));
-    // if(stats && Object.keys(stats).length > 0) {
-    //   const { dispatch } = this.props;
-    //   console.log(stats)
-    //   dispatch(reinitStats(stats))
-    // }
     window.addEventListener("beforeunload", this.onUnload);
   }
 
   init = () => {
-    const barNodes = [{}];
     this.initMetronome();
     this.initSamples();
-    this.setState({barNodes});
+    this.initBars();
   };
 
   togglePlay = () => {
@@ -200,8 +203,6 @@ class SynthReactor extends Component {
 
   onUnload = e => {
     const { stats } = this.props;
-    // localStorage.setItem('stats', JSON.stringify(stats));
-    // return "Are you sure to leave this page?";
   };
 
   play = () => {
@@ -234,17 +235,22 @@ class SynthReactor extends Component {
     this.setState({metronome: {...metronome, click: {down, up}}})
   };
 
-  initSamples = samples => {
-    // const smpls = samples || this.props.stats.samples;
+  initSamples = () => {
     let sampleNodes = [
       <Sample key={0} color={colors[0]} onDelete={this.deleteSample} name="Kick" src="/static/samples/kicks/kick_1.wav" />,
       <Sample key={1} color={colors[1]} onDelete={this.deleteSample} name="Snare" src="/static/samples/snares/snare_4.wav" />,
       <Sample key={2} color={colors[2]} onDelete={this.deleteSample} name="Hi-hat" src="/static/samples/hihats/hihat_008a.wav" />
     ];
-    // smpls.map((sample, idx) => {
-    //   sampleNodes.push(<Sample key={sample.id} id={sample.id} color={colors[idx]} onDelete={this.deleteSample} name={sample.name} src={sample.src} />);
-    // });
-    this.setState({sampleNodes}, () => console.log(this.props.stats.samples))
+    this.setState({sampleNodes})
+  };
+
+  initBars = () => {
+    const { barsOnStart } = this.props.stats;
+    let barNodes = [];
+    for(let i = 0; i < barsOnStart; i++) {
+      barNodes.push(<Bar key={i} index={i} onClick={this.onClickAction} />)
+    }
+    this.setState({barNodes})
   };
 
   setPlayInterval = () => {
@@ -262,7 +268,6 @@ class SynthReactor extends Component {
         } else {
           newBar = bar + 1;
         }
-        // newBar = bar === bars.length - 1 ? 0 : bar + 1;
         if(!mute) up.play();
       } else {
         if(!mute) down.play();
@@ -281,7 +286,7 @@ class SynthReactor extends Component {
 
   samplePlayable = sample => {
     return !sample.mute && !sample.deleted;
-  }
+  };
 
   toggleMetronome = e => {
     const { metronome } = this.state;
@@ -304,17 +309,20 @@ class SynthReactor extends Component {
   };
 
   deleteBar = barID => {
+    const { barInfo } = this.state;
     const { dispatch } = this.props;
-    let { barNodes } = this.state;
     dispatch(deleteBar(barID));
-
-    this.setState({barNodes, barInfo: null})
+    this.setState({barInfo: {...barInfo, index: null}})
   };
 
   onClickAction = object => {
-    this.setState(object)
+    const { barInfo } = this.state;
+    if(object.barInfo !== null) {
+      this.setState({barInfo: {...barInfo, index: object.barInfo}})
+    } else {
+      this.setState(object)
+    }
   };
-
 
   toggleModal = () => {
     const { modalOpened } = this.state;
@@ -354,13 +362,17 @@ class SynthReactor extends Component {
     this.setState({loop: !loop})
   };
 
+  reinitBars = () => {
+    const { bars } = this.props.stats;
+    const { barNodes } = this.state;
+  };
+
   renderBars = () => {
     const { barNodes, barInfo } = this.state;
-    console.log(this.props.bars);
     return (
       <div className="bars-container">
         {barNodes.map((bar, idx) => {
-          return (<Bar key={idx} index={idx} deleted={bar.deleted} active={barInfo === idx} onClick={this.onClickAction} />)
+          return (<Bar key={idx} index={idx} active={barInfo.index === idx} onClick={this.onClickAction} />)
         })}
       </div>
     )
@@ -492,11 +504,22 @@ class SynthReactor extends Component {
               </div>
               <Divider />
               <div className={classNames("controls-bar", classes.controlsBars)}>
-                {barInfo !== null ?
+                {barInfo.index !== null ?
                   <div className="controls-bar-single">
-                    <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={_ => this.deleteBar(barInfo)}>
-                      <Delete />
-                    </Button>
+                    <div className="controls-bar-single-chip">
+                      <Chip avatar={<Avatar>{barInfo.index + 1}</Avatar>} label="Bar" className={classes.chip}/>
+                    </div>
+                    <div className="controls-bar-single-buttons">
+                      <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={_ => this.deleteBar(barInfo.index)}>
+                        <Delete />
+                      </Button>
+                      <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={_ => this.muteBar(barInfo.index)}>
+                        <VolumeUp />
+                      </Button>
+                      <Button variant="fab" mini color="secondary" aria-label="add" className="button" onClick={_ => this.loopBar(barInfo.index)}>
+                        <Loop />
+                      </Button>
+                    </div>
                   </div> : null
                 }
               </div>
@@ -560,8 +583,5 @@ class SynthReactor extends Component {
 
 }
 
-SynthReactor.propTypes = {
-
-};
 
 export default connect(state => state)(withStyles(styles)(SynthReactor));

@@ -42,6 +42,12 @@ export function deleteBar(index) {
   };
 }
 
+export function clearDeletedBarID() {
+  return {
+    type: 'CLEAR_DELETED_BAR_ID'
+  };
+}
+
 export function switchNoteInBar(index, noteIndex, sampleIndex) {
   return {
     type: 'SWITCH_NOTE_IN_BAR',

@@ -15,7 +15,9 @@ const initialState = {
     bar: 0,
     beat: 0,
     note: 0
-  }
+  },
+  lastDeletedBarID: null,
+  barsOnStart: 1
 };
 
 export default function (state = initialState, action) {
@@ -48,9 +50,12 @@ export default function (state = initialState, action) {
       return {...state, bars};
 
     case 'DELETE_BAR':
-      bars = state.bars;
-      bars[action.index].deleted = true;
-      return {...state, bars: bars};
+      console.log('Deleting bar: ', action.index);
+      bars = state.bars.filter((bar, idx) => idx !== action.index);
+      return {...state, bars, lastDeletedBarID: action.index};
+
+    case 'CLEAR_DELETED_BAR_ID':
+      return {...state, lastDeletedBarID: null};
 
     case 'SET_PLAY':
       return {...state, playing: action.playing};
@@ -69,7 +74,6 @@ export default function (state = initialState, action) {
       return {...state, bpm: action.bpm};
 
     case 'REINIT_STATS':
-      console.log(action.stats);
       return {stats: action.stats};
 
     default:

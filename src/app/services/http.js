@@ -14,7 +14,6 @@ let exec = function(config = {}){
     if (xhr.readyState !== 4) { return }
     let json;
 
-    console.log(xhr.response)
     try { json = JSON.parse(xhr.response) } catch(e) { json = { errors: [e.message] } }
     if (xhr.status === 200) {
       callbacks.success(json);

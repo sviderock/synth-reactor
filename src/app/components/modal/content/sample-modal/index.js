@@ -27,7 +27,6 @@ class SamplesModalContent extends Component {
   };
 
   componentDidMount() {
-    console.log('mounted');
     fetch('http://localhost:8080/getSamples').then(res => {
       return res.json()
     }).then(data => this.setState({samples: data.fileslist}));
@@ -49,14 +48,12 @@ class SamplesModalContent extends Component {
     const { samples } = this.props.stats;
     const path = '/static/samples/' + dir + '/' + sound;
     const colorIDX = samples.length >= colors.length ? (samples.length - colors.length) : samples.length;
-    console.log(colorIDX);
     const sample = <Sample color={colors[colorIDX]} key={samples.length} name={sound} src={path} />;
     this.props.onSampleAdd(sample);
   };
 
   render() {
     const { samples, openedLists } = this.state;
-    console.log(openedLists);
     return (
       ![null, undefined].includes(samples) ?
       <div>

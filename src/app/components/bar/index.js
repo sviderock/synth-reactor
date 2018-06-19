@@ -111,8 +111,8 @@ class Bar extends Component {
 
   render() {
     const { index, classes, active, deleted } = this.props;
-    console.log(this.props.stats.bars)
     return (
+      deleted ? null :
       <div className="bar" id={`bar-${index + 1}`}>
         <div className={classNames("bar-info", classes.barInfo, active ? classes.barInfoActive : null)}>
           <span className="bar-info-name" onClick={_ => this.activateBarInfo(index)}>Bar {index + 1}</span>
