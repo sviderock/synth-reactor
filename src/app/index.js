@@ -8,12 +8,16 @@ import reducers from './reducers';
 
 import App from './components/App';
 import SynthReactor from './components/synth-reactor';
+import ReactGA from 'react-ga';
 
 import './components/bundle.scss';
 
 const history = createBrowserHistory();
 const createStoreWithMiddleware = applyMiddleware()(createStore);
 const store = createStoreWithMiddleware(reducers);
+
+ReactGA.initialize('UA-121329291-1');
+ReactGA.pageview(window.location.pathname + window.location.search);
 
 ReactDOM.render(
   <Provider store={store}>
