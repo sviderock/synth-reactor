@@ -27,7 +27,7 @@ class SamplesModalContent extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:8080/getSamples').then(res => {
+    fetch('/getSamples').then(res => {
       return res.json()
     }).then(data => this.setState({samples: data.fileslist}));
   }

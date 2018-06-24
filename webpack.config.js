@@ -100,7 +100,7 @@ if (!isProduction) {
     historyApiFallback: true,
     open: true,
     proxy: {
-      "/api": "http://localhost:8080"
+      "/": "http://localhost:8080"
     }
   };
 }
